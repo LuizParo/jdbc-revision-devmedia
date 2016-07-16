@@ -114,13 +114,27 @@ public class PessoaDaoTest {
         Assert.assertNotEquals(person.getDataNascimento(), personRecovered.getDataNascimento());
     }
     
+    @Test
+    public void shouldRemoveAllPeople() {
+        Pessoa personOne = this.createPerson("João da Silva");
+        Pessoa personTwo = this.createPerson("Maria da Silva");
+        Pessoa personThree = this.createPerson("Fernando da Silva");
+        this.dao.save(personOne);
+        this.dao.save(personTwo);
+        this.dao.save(personThree);
+        
+        int rowsRemoved = this.dao.removeAll();
+        Assert.assertEquals(3, rowsRemoved);
+    }
+    
     @Test(expected = IllegalArgumentException.class)
-    public void shouldDeletePerson() {
+    public void shouldRemovePerson() {
         Pessoa person = this.createPerson("João da Silva");
         this.dao.save(person);
         
         int rowsRemoved = this.dao.remove(person.getId());
         Assert.assertEquals(1, rowsRemoved);
-        Assert.assertNull(this.dao.findById(person.getId()));
+        
+        this.dao.findById(person.getId());
     }
 }
