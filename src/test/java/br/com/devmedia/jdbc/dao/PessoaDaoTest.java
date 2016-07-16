@@ -1,7 +1,8 @@
 package br.com.devmedia.jdbc.dao;
 
 import java.sql.Connection;
-import java.util.Calendar;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import org.junit.After;
@@ -29,42 +30,42 @@ public class PessoaDaoTest {
     }
     
     private Pessoa createPerson(String name) {
-        Calendar dataNascimentoCalendar = Calendar.getInstance();
-        dataNascimentoCalendar.set(Calendar.DAY_OF_MONTH, 2);
-        dataNascimentoCalendar.set(Calendar.MONTH, Calendar.OCTOBER);
-        dataNascimentoCalendar.set(Calendar.YEAR, 1985);
-        
-        Pessoa pessoa = new Pessoa();
-        pessoa.setNome(name);
-        pessoa.setProfissao("Administrator");
-        pessoa.setDataNascimento(dataNascimentoCalendar.getTime());
-        return pessoa;
+        try {
+            Pessoa person = new Pessoa();
+            person.setNome(name);
+            person.setProfissao("Administrator");
+            person.setDataNascimento(new SimpleDateFormat("dd/MM/yyyy").parse("02/10/1985"));
+            return person;
+        } catch (ParseException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     @Test
     public void shouldPersistPersonInDatabase() {
-        Pessoa pessoa = this.createPerson("João da Silva");
+        Pessoa person = this.createPerson("João da Silva");
         
-        int generatedId = this.dao.save(pessoa);
+        int generatedId = this.dao.save(person);
         Assert.assertTrue(generatedId > 0);
+        Assert.assertNotNull(person.getId());
     }
     
     @Test
     public void shouldFindPersonById() {
-        Pessoa pessoa = this.createPerson("João da Silva");
-        int generatedId = this.dao.save(pessoa);
+        Pessoa person = this.createPerson("João da Silva");
+        int generatedId = this.dao.save(person);
         
-        Pessoa pessoaRecuperada = this.dao.findById(generatedId);
-        Assert.assertEquals(Integer.valueOf(generatedId), pessoaRecuperada.getId());
+        Pessoa personRecovered = this.dao.findById(generatedId);
+        Assert.assertEquals(Integer.valueOf(generatedId), personRecovered.getId());
     }
     
     @Test
     public void shouldFindPersonByNome() {
-        Pessoa pessoa = this.createPerson("João da Silva");
-        this.dao.save(pessoa);
+        Pessoa person = this.createPerson("João da Silva");
+        this.dao.save(person);
         
-        Pessoa pessoaRecuperada = this.dao.findByNome(pessoa.getNome());
-        Assert.assertEquals(pessoa.getNome(), pessoaRecuperada.getNome());
+        Pessoa personRecovered = this.dao.findByNome(person.getNome());
+        Assert.assertEquals(person.getNome(), personRecovered.getNome());
     }
     
     @Test
@@ -92,5 +93,34 @@ public class PessoaDaoTest {
         for (Pessoa person : people) {
             Assert.assertEquals("Administrator", person.getProfissao());
         }
+    }
+    
+    @Test
+    public void shouldUpdatePerson() throws ParseException {
+        Pessoa person = this.createPerson("João da Silva");
+        this.dao.save(person);
+        
+        Pessoa personToUpdate = new Pessoa();
+        personToUpdate.setId(person.getId());
+        personToUpdate.setNome("Pedro Rosa");
+        personToUpdate.setProfissao("Systems Analyst");
+        personToUpdate.setDataNascimento(new SimpleDateFormat("dd/MM/yyyy").parse("08/06/1989"));
+        int update = this.dao.update(personToUpdate);
+        
+        Pessoa personRecovered = this.dao.findById(person.getId());
+        Assert.assertEquals(1, update);
+        Assert.assertNotEquals(person.getNome(), personRecovered.getNome());
+        Assert.assertNotEquals(person.getProfissao(), personRecovered.getProfissao());
+        Assert.assertNotEquals(person.getDataNascimento(), personRecovered.getDataNascimento());
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldDeletePerson() {
+        Pessoa person = this.createPerson("João da Silva");
+        this.dao.save(person);
+        
+        int rowsRemoved = this.dao.remove(person.getId());
+        Assert.assertEquals(1, rowsRemoved);
+        Assert.assertNull(this.dao.findById(person.getId()));
     }
 }
