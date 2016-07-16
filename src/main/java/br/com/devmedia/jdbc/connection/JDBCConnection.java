@@ -5,12 +5,15 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ResourceBundle;
 
 public class JDBCConnection {
-    private static final String JDBC_URL = "jdbc:mysql://localhost:3306/jdbcdb";
-    private static final String JDBC_USER = "root";
-    private static final String JDBC_PASS = "root";
-    private static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
+    private static final ResourceBundle RESOURCE = ResourceBundle.getBundle("jdbc");
+    
+    private static final String JDBC_URL = RESOURCE.getString("jdbc.url");
+    private static final String JDBC_USER = RESOURCE.getString("jdbc.username");
+    private static final String JDBC_PASS = RESOURCE.getString("jdbc.password");
+    private static final String JDBC_DRIVER = RESOURCE.getString("jdbc.driver");
     
     public static Connection getConnection() {
         try {
