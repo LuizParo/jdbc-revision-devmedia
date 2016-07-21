@@ -26,7 +26,7 @@ public class JDBCConnection {
     
     public static void close(Connection connection) {
         try {
-            if(connection != null && connection.isClosed()) {
+            if(connection != null && !connection.isClosed()) {
                 connection.close();
             }
         } catch (SQLException e) {
@@ -36,7 +36,7 @@ public class JDBCConnection {
     
     public static void close(Connection connection, PreparedStatement statement) {
         try {
-            if(statement != null && statement.isClosed()) {
+            if(statement != null && !statement.isClosed()) {
                 statement.close();
             }
             close(connection);
@@ -47,7 +47,7 @@ public class JDBCConnection {
     
     public static void close(Connection connection, PreparedStatement statement, ResultSet resultSet) {
         try {
-            if(resultSet != null && resultSet.isClosed()) {
+            if(resultSet != null && !resultSet.isClosed()) {
                 resultSet.close();
             }
             close(connection, statement);
